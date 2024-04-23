@@ -4,10 +4,15 @@ variable "project_name" {
   nullable    = false
 }
 
-variable "instance_name" {
-  description = "Instance Name"
-  type        = string
+variable "instances" {
+  description = "Mapping of instances"
+  type        = any
   nullable    = false
+}
+
+variable "ansible_groups" {
+    type = any
+    description = "Mapping defining types of compute nodes: key -> (str) name of type, value -> mapping {flavor: flavor_name, image: image_name_or_id }"
 }
 
 variable "flavor_name" {
