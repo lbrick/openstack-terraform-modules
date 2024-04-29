@@ -18,6 +18,7 @@ resource "openstack_compute_instance_v2" "host" {
   }
 
   network {
-    name = var.project_name
+    port = openstack_networking_port_v2.instance[each.key].id
+    access_network = true
   }
 }
