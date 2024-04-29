@@ -2,15 +2,26 @@
 vm_private_key_file=${vm_private_key_file}
 %{~ for fips in floating_ips }
     %{~ for instance in instances ~}
-        %{~ if fips.description == instance.name ~}
-ansible_ssh_common_args='-o ProxyCommand="ssh -W %h:%p -q cloud-user@${fips.address}"'
+        %{~ if fips.instance_id == instance.id ~}
+ansible_ssh_common_args='-o ProxyCommand="ssh -W %h:%p -q cloud-user@${fips.floating_ip}"'
         %{~ endif ~}
 %{~ endfor ~}
 %{ endfor ~}
 
 [all]
 %{ for instance in instances ~}
-${split(".", instance.name)[0]} ansible_host=${instance.all_fixed_ips[0]} node_fqdn=${ instance.name }
+    %{~ for fips in floating_ips ~}
+        %{~ if fips.instance_id == instance.id ~}
+${split(".", instance.name)[0]} ansible_host=${instance.access_ip_v4} node_fqdn=${ instance.name } external_ip=${fips.floating_ip}
+        %{~ endif ~}
+    %{~ endfor ~}
+%{ endfor ~}
+%{ for fips in floating_ips ~}
+    %{~ for instance in instances ~}
+        %{~ if fips.instance_id != instance.id ~}
+${split(".", instance.name)[0]} ansible_host=${instance.access_ip_v4} node_fqdn=${ instance.name }
+        %{~ endif ~}
+    %{~ endfor ~}
 %{ endfor ~}
 
 # Define ansible groups
