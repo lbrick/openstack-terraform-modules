@@ -1,6 +1,12 @@
 [all:vars]
 vm_private_key_file=${vm_private_key_file}
-ansible_ssh_common_args="-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
+%{~ for fips in floating_ips }
+    %{~ for instance in instances ~}
+        %{~ if fips.description == instance.name ~}
+ansible_ssh_common_args='-o ProxyCommand="ssh -W %h:%p -q cloud-user@${fips.address}"'
+        %{~ endif ~}
+%{~ endfor ~}
+%{ endfor ~}
 
 [all]
 %{ for instance in instances ~}
